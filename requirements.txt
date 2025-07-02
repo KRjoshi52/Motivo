@@ -4,3 +4,4 @@ python-dotenv==1.0.0
 Flask-Login
 Flask-SQLAlchemy
 Flask-Dance[google]==6.2.0 
+gunicorn
