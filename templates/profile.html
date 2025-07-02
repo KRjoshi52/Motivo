@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile | Motivo</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="journal-title">My Journal</h1>
+        <p class="journal-welcome">Welcome, {{ current_user.name or current_user.email }}!</p>
+        <div class="journal-streak mb-3">🔥 Daily Streak: <span id="streakCount">3</span> days</div>
+        <h2 class="journal-section-title">Recent AI Conversations</h2>
+        {% if chat_history and chat_history|length > 0 %}
+            <div class="journal-history-list">
+                {% for msg in chat_history %}
+                    <div class="journal-entry {{ msg.role }}">
+                        <strong>{{ msg.role|capitalize }}:</strong> {{ msg.content }}
+                        <button class="favorite-btn" title="Favorite this quote">⭐</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No journal entries yet. Start a conversation!</p>
+        {% endif %}
+        <a href="/" class="btn btn-outline-secondary mt-4">Back to Home</a>
+    </div>
+</body>
+</html> 

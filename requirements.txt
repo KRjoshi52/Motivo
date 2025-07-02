@@ -1,0 +1,6 @@
+Flask==2.3.3
+openai>=1.0.0
+python-dotenv==1.0.0
+Flask-Login
+Flask-SQLAlchemy
+Flask-Dance[google]==6.2.0 

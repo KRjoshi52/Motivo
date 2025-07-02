@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motivo - You're Weirdly Amazing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>✨</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Dynamic Greeting -->
+        <div id="dynamicGreeting" class="text-center mb-2" style="font-size:1.3rem;font-weight:600;color:#68d391;"></div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 col-sm-12">
+                <div class="main-content">
+                    <!-- Header with Logo -->
+                    <div class="text-center mb-5">
+                        <div class="logo-container">
+                            <h1 class="brand-logo">
+                                <span class="logo-text">Motivo</span>
+                                <span class="logo-sparkle">✨</span>
+                            </h1>
+                            <div class="logo-subtitle">Transform Your Mood</div>
+                        </div>
+                        <h2 class="main-headline" id="dynamicHeadline">You're weirdly amazing. Don't change.</h2>
+                        <p class="subtitle">Let's turn that mood around ✨</p>
+
+                        <!-- Motivational and Community Chat Buttons -->
+                        <div class="text-center mb-3">
+                            <button class="btn btn-warning btn-lg me-2" onclick="motivateMe()">Motivate Me</button>
+                            <a href="{{ url_for('community') }}" class="btn btn-info btn-md mt-2">Community Chat</a>
+                        </div>
+                        <!-- End Motivational and Community Chat Buttons -->
+
+                        <!-- Mood Input Section -->
+                        <div class="mood-section">
+                            <div class="form-group">
+                                <label for="moodInput" class="form-label">How are you feeling today?</label>
+                                <!-- Quick Mood Buttons -->
+                                <div class="mood-buttons mb-3" id="moodButtons">
+                                    <button class="mood-btn" onclick="setMood('stressed', this)">😰 Stressed</button>
+                                    <button class="mood-btn" onclick="setMood('anxious', this)">😰 Anxious</button>
+                                    <button class="mood-btn" onclick="setMood('sad', this)">😢 Sad</button>
+                                    <button class="mood-btn" onclick="setMood('depressed', this)">😔 Depressed</button>
+                                    <button class="mood-btn" onclick="setMood('lonely', this)">😔 Lonely</button>
+                                    <button class="mood-btn" onclick="setMood('overwhelmed', this)">😵 Overwhelmed</button>
+                                    <button class="mood-btn" onclick="setMood('tired', this)">😴 Tired</button>
+                                    <button class="mood-btn" onclick="setMood('frustrated', this)">😤 Frustrated</button>
+                                </div>
+                                <textarea 
+                                    class="form-control mood-input" 
+                                    id="moodInput" 
+                                    rows="3" 
+                                    placeholder="Or tell us more about what's on your mind... (e.g., stressed about work, feeling lonely, excited about something)"
+                                ></textarea>
+                            </div>
+                            <!-- Response Type Selection -->
+                            <div class="response-type-section mt-3">
+                                <label class="form-label" style="color:#2563eb;font-weight:600;">What kind of boost do you need?</label>
+                                <div class="response-type-buttons">
+                                    <button class="response-type-btn active" onclick="setResponseType('random')" data-type="random">
+                                        🎲 Surprise Me
+                                    </button>
+                                    <button class="response-type-btn" onclick="setResponseType('funny')" data-type="funny">
+                                        😂 Make Me Laugh
+                                    </button>
+                                    <button class="response-type-btn" onclick="setResponseType('motivational')" data-type="motivational">
+                                        💪 Pump Me Up
+                                    </button>
+                                    <button class="response-type-btn" onclick="setResponseType('scientific')" data-type="scientific">
+                                        🧠 Science Me
+                                    </button>
+                                    <button class="response-type-btn" onclick="setResponseType('actionable')" data-type="actionable">
+                                        ⚡ Give Me Action
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-center mt-4">
+                                <button class="btn btn-spark" id="sparkBtn" onclick="sparkMe()">
+                                    <span class="spark-text">Spark Me ✨</span>
+                                    <div class="sparkle"></div>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- End Mood Input Section -->
+
+                    </div>
+
+                    <!-- User Auth Section (moved below Spark Me) -->
+                    <div class="auth-section mb-4 text-end">
+                        {% if current_user.is_authenticated %}
+                            <span class="welcome-msg">Welcome, {{ current_user.name or current_user.email }}!</span>
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-info btn-sm ms-2">My Profile</a>
+                            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm ms-2">Logout</a>
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-info btn-sm ms-2">My Journal</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-sm me-2">Login</a>
+                            <a href="{{ url_for('register') }}" class="btn btn-outline-success btn-sm me-2">Register</a>
+                            <a href="{{ url_for('google_login') }}" class="btn btn-outline-dark btn-sm">Login with Google</a>
+                        {% endif %}
+                    </div>
+                    <!-- End User Auth Section -->
+
+                    <!-- Loading State -->
+                    <div class="loading-container" id="loadingContainer" style="display: none;">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p class="loading-text">Creating your spark...</p>
+                        </div>
+                    </div>
+
+                    <!-- AI Response Section -->
+                    <div class="response-section" id="responseSection" style="display: none;">
+                        <div class="response-card">
+                            <h3 class="response-title">Your Personal Spark ✨</h3>
+                            <div class="response-content" id="aiResponse"></div>
+                            <!-- Confetti container -->
+                            <canvas id="confettiCanvas" style="position:absolute;left:0;top:0;pointer-events:none;z-index:999;display:none;"></canvas>
+                            
+                            <!-- Feedback Section -->
+                            <div class="feedback-section mt-3">
+                                <p class="feedback-text">How did this make you feel?</p>
+                                <div class="feedback-buttons">
+                                    <button class="feedback-btn like-btn" onclick="giveFeedback('like')" id="likeBtn">
+                                        <span class="feedback-icon">👍</span>
+                                        <span class="feedback-text">This helped!</span>
+                                    </button>
+                                    <button class="feedback-btn dislike-btn" onclick="giveFeedback('dislike')" id="dislikeBtn">
+                                        <span class="feedback-icon">👎</span>
+                                        <span class="feedback-text">Not quite right</span>
+                                    </button>
+                                </div>
+                                <div class="feedback-message" id="feedbackMessage" style="display: none;"></div>
+                            </div>
+                            
+                            <div class="response-actions mt-3">
+                                <button class="btn btn-secondary btn-sm" onclick="sparkMe()">
+                                    🔄 Try Another
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm" onclick="copyResponse()">
+                                    📋 Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div class="error-container" id="errorContainer" style="display: none;">
+                        <div class="alert alert-warning" role="alert">
+                            <span id="errorMessage"></span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Mood Boosters -->
+                    <div class="boosters-section">
+                        <div class="booster-card">
+                            <h3 class="booster-title">🚀 Quick Mood Boosters</h3>
+                            <div class="booster-grid">
+                                <button class="booster-btn" onclick="quickBoost('breathing')">
+                                    <span class="booster-icon">🫁</span>
+                                    <span class="booster-text">3 Deep Breaths</span>
+                                </button>
+                                <button class="booster-btn" onclick="quickBoost('gratitude')">
+                                    <span class="booster-icon">🙏</span>
+                                    <span class="booster-text">Gratitude List</span>
+                                </button>
+                                <button class="booster-btn" onclick="quickBoost('movement')">
+                                    <span class="booster-icon">💃</span>
+                                    <span class="booster-text">Dance Break</span>
+                                </button>
+                                <button class="booster-btn" onclick="quickBoost('grounding')">
+                                    <span class="booster-icon">🌍</span>
+                                    <span class="booster-text">Grounding</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5 Second Rule Section -->
+                    <div class="rule-section">
+                      <h2>🚀 Power Up with the 5 Second Rule</h2>
+                      <p class="description">
+                        <strong>Count backward: 5… 4… 3… 2… 1… then GO.</strong>  
+                        This simple technique interrupts your brain's autopilot and sparks real action. 
+                        Scientifically backed and used by millions, it was created by <a href="https://melrobbins.com" target="_blank">Mel Robbins</a>.
+                      </p>
+                      <p class="description">
+                        <em>Use the 5 Second Rule in everyday moments when you need a little courage or a push to act:</em>
+                      </p>
+                      <div class="practice-grid">
+                        <div class="practice-card">🌅 <strong>Waking Up Early</strong><br><span>Launch out of bed instead of snoozing.</span></div>
+                        <div class="practice-card">🤝 <strong>Meeting New People</strong><br><span>Override shyness and say hello first.</span></div>
+                        <div class="practice-card">💬 <strong>Answering in Class</strong><br><span>Speak up even if you feel nervous.</span></div>
+                        <div class="practice-card">😰 <strong>Handling Stressful News</strong><br><span>Pause, breathe, and act instead of spiraling.</span></div>
+                        <div class="practice-card">🧠 <strong>Stop Overthinking</strong><br><span>Interrupt the loop and just act.</span></div>
+                        <div class="practice-card">🎤 <strong>Job Interview</strong><br><span>Calm your nerves and answer confidently.</span></div>
+                      </div>
+                      <div class="why-it-works">
+                        <h4>💡 Why It Works:</h4>
+                        <p>
+                          Your brain is designed to protect you from discomfort — even when it holds you back.  
+                          The 5 Second Rule hijacks this instinct just long enough for you to take meaningful action — before fear, doubt, or hesitation win.
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Chat Container -->
+                    <div class="chat-container">
+                        <div id="chat-history" class="chat-history"></div>
+                        <form id="chat-form" class="chat-form" autocomplete="off">
+                            <input type="text" id="chat-input" placeholder="Type how you feel or ask anything..." required />
+                            <button type="submit">Send</button>
+                        </form>
+                    </div>
+
+                    <!-- After AI response, add share buttons -->
+                    <div class="share-section mt-3" id="shareSection" style="display:none;">
+                        <button class="btn btn-outline-success btn-sm me-2" onclick="copyResponse()">📋 Copy</button>
+                        <a class="btn btn-outline-primary btn-sm me-2" id="twitterShare" target="_blank">🐦 Twitter</a>
+                        <a class="btn btn-outline-success btn-sm" id="whatsappShare" target="_blank">💬 WhatsApp</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Footer -->
+    <footer class="site-footer" aria-label="Site footer">
+        <span>&copy; 2025 Motivo &mdash; <a href="{{ url_for('about') }}">About</a> | <a href="{{ url_for('privacy') }}">Privacy</a> | <a href="{{ url_for('community') }}">Community</a></span>
+    </footer>
+
+    <!-- Add privacy consent banner at bottom -->
+    <div id="consentBanner" class="cookie-banner" style="position:fixed;bottom:0;left:0;width:100%;background:#f8f9ff;border-top:1px solid #e0e7ef;padding:1rem 2rem;z-index:3000;display:flex;justify-content:center;align-items:center;gap:1rem;box-shadow:0 -2px 8px rgba(0,0,0,0.04);">
+        <span>We use AI to generate mood-boosting responses. By continuing, you agree to our <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>.</span>
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('consentBanner').style.display='none'">OK</button>
+    </div>
+
+    <script>
+        // For Flask:
+        // var userName = {% if current_user.is_authenticated %}{{ (current_user.name or current_user.email)|tojson }}{% else %}""{% endif %};
+        // For static/linter:
+        var userName = "";
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentScenario = 'general';
+        let currentResponseType = 'random';
+        let countdownInterval;
+        let currentResponse = '';
+        let currentResponseId = 0;
+        let currentUserId = 'user_' + Math.random().toString(36).substr(2, 9);
+        
+        const scenarios = {
+            'wakeup': {
+                text: 'Get out of bed and start your day!',
+                action: 'Stand up, stretch, and take your first step!'
+            },
+            'meeting': {
+                text: 'Approach and introduce yourself!',
+                action: 'Walk over, smile, and say hello!'
+            },
+            'answer': {
+                text: 'Speak up and share your thoughts!',
+                action: 'Raise your hand and speak confidently!'
+            },
+            'stress': {
+                text: 'Take a deep breath and relax!',
+                action: 'Breathe deeply, release tension, and center yourself!'
+            },
+            'thinking': {
+                text: 'Stop overthinking and take action!',
+                action: 'Make a decision and move forward!'
+            }
+        };
+
+        function setResponseType(type) {
+            currentResponseType = type;
+            const buttons = document.querySelectorAll('.response-type-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function setScenario(scenario) {
+            currentScenario = scenario;
+            const scenarioButtons = document.querySelectorAll('.scenario-btn');
+            scenarioButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Reset countdown
+            resetCountdown();
+        }
+
+        function setMood(mood, btn) {
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // Emoji bounce
+            btn.style.transform = 'scale(1.25)';
+            setTimeout(() => { btn.style.transform = ''; }, 250);
+            const moodInput = document.getElementById('moodInput');
+            const moodTexts = {
+                'stressed': "I'm feeling stressed",
+                'anxious': "I'm feeling anxious",
+                'sad': "I'm feeling sad",
+                'depressed': "I'm feeling depressed",
+                'lonely': "I'm feeling lonely",
+                'overwhelmed': "I'm feeling overwhelmed",
+                'tired': "I'm feeling tired",
+                'frustrated': "I'm feeling frustrated"
+            };
+            moodInput.value = moodTexts[mood] || `I'm feeling ${mood}`;
+        }
+
+        function updateHeadline(slogan) {
+            const headline = document.getElementById('dynamicHeadline');
+            headline.style.opacity = '0';
+            
+            setTimeout(() => {
+                headline.textContent = slogan;
+                headline.style.opacity = '1';
+            }, 300);
+        }
+
+        function giveFeedback(feedbackType) {
+            const likeBtn = document.getElementById('likeBtn');
+            const dislikeBtn = document.getElementById('dislikeBtn');
+            const feedbackMessage = document.getElementById('feedbackMessage');
+            
+            // Disable both buttons to prevent multiple submissions
+            likeBtn.disabled = true;
+            dislikeBtn.disabled = true;
+            
+            // Visual feedback
+            if (feedbackType === 'like') {
+                likeBtn.classList.add('active');
+                dislikeBtn.classList.remove('active');
+            } else {
+                dislikeBtn.classList.add('active');
+                likeBtn.classList.remove('active');
+            }
+            
+            // Send feedback to server
+            fetch('/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: currentUserId,
+                    response: currentResponse,
+                    type: feedbackType,
+                    response_id: currentResponseId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    feedbackMessage.textContent = feedbackType === 'like' ? 
+                        'Thanks! We\'ll give you more responses like this! 😊' : 
+                        'Thanks! We\'ll try to give you better responses next time! 💪';
+                    feedbackMessage.className = 'feedback-message success';
+                } else {
+                    feedbackMessage.textContent = 'Thanks for your feedback! 💜';
+                    feedbackMessage.className = 'feedback-message success';
+                }
+                feedbackMessage.style.display = 'block';
+                
+                // Re-enable buttons after a delay
+                setTimeout(() => {
+                    likeBtn.disabled = false;
+                    dislikeBtn.disabled = false;
+                    likeBtn.classList.remove('active');
+                    dislikeBtn.classList.remove('active');
+                }, 2000);
+            })
+            .catch(error => {
+                feedbackMessage.textContent = 'Thanks for your feedback! 💜';
+                feedbackMessage.className = 'feedback-message success';
+                feedbackMessage.style.display = 'block';
+                
+                // Re-enable buttons
+                setTimeout(() => {
+                    likeBtn.disabled = false;
+                    dislikeBtn.disabled = false;
+                    likeBtn.classList.remove('active');
+                    dislikeBtn.classList.remove('active');
+                }, 2000);
+            });
+        }
+
+        function quickBoost(type) {
+            const boosters = {
+                'breathing': {
+                    title: '🫁 Breathing Exercise',
+                    steps: ['Take a deep breath in for 4 counts', 'Hold for 4 counts', 'Exhale slowly for 6 counts', 'Repeat 3 times']
+                },
+                'gratitude': {
+                    title: '🙏 Gratitude Practice',
+                    steps: ['Think of 3 things you\'re grateful for', 'Write them down or say them out loud', 'Feel the warmth of appreciation']
+                },
+                'movement': {
+                    title: '💃 Movement Break',
+                    steps: ['Stand up and stretch', 'Do 10 jumping jacks', 'Dance to your favorite song', 'Feel the energy flow!']
+                },
+                'grounding': {
+                    title: '🌍 Grounding Exercise',
+                    steps: ['Name 5 things you can see', 'Name 4 things you can touch', 'Name 3 things you can hear', 'Name 2 things you can smell', 'Name 1 thing you can taste']
+                }
+            };
+
+            const booster = boosters[type];
+            if (booster) {
+                showBoosterModal(booster.title, booster.steps);
+            }
+        }
+
+        function showBoosterModal(title, steps) {
+            const modal = document.createElement('div');
+            modal.className = 'booster-modal';
+            modal.innerHTML = `
+                <div class="booster-modal-content">
+                    <h3>${title}</h3>
+                    <ol>
+                        ${steps.map(step => `<li>${step}</li>`).join('')}
+                    </ol>
+                    <button onclick="this.parentElement.parentElement.remove()" class="btn btn-primary">Got it! ✨</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function copyResponse() {
+            const response = document.getElementById('aiResponse').textContent;
+            navigator.clipboard.writeText(response).then(() => {
+                // Show a brief "Copied!" message
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function startCountdown() {
+            const countdownDisplay = document.getElementById('countdownDisplay');
+            const startBtn = document.getElementById('startCountdownBtn');
+            const actionPrompt = document.getElementById('actionPrompt');
+            const countdownNumber = document.getElementById('countdownNumber');
+            const countdownText = document.getElementById('countdownText');
+            
+            // Hide start button and action prompt
+            startBtn.style.display = 'none';
+            actionPrompt.style.display = 'none';
+            
+            // Show countdown display
+            countdownDisplay.style.display = 'block';
+            
+            let count = 5;
+            countdownNumber.textContent = count;
+            countdownText.textContent = 'Get ready...';
+            
+            countdownInterval = setInterval(() => {
+                count--;
+                countdownNumber.textContent = count;
+                
+                if (count === 0) {
+                    clearInterval(countdownInterval);
+                    countdownDisplay.style.display = 'none';
+                    
+                    // Show action prompt
+                    const scenario = scenarios[currentScenario];
+                    const actionText = document.getElementById('actionText');
+                    actionText.textContent = scenario ? scenario.action : 'Take action now!';
+                    actionPrompt.style.display = 'block';
+                    
+                    // Show start button again after 3 seconds
+                    setTimeout(() => {
+                        startBtn.style.display = 'inline-block';
+                    }, 3000);
+                } else if (count <= 3) {
+                    countdownText.textContent = 'Almost there...';
+                }
+            }, 1000);
+        }
+
+        function resetCountdown() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            document.getElementById('countdownDisplay').style.display = 'none';
+            document.getElementById('startCountdownBtn').style.display = 'inline-block';
+            document.getElementById('actionPrompt').style.display = 'none';
+        }
+
+        async function sparkMe() {
+            const moodInput = document.getElementById('moodInput');
+            const sparkBtn = document.getElementById('sparkBtn');
+            const loadingContainer = document.getElementById('loadingContainer');
+            const responseSection = document.getElementById('responseSection');
+            const errorContainer = document.getElementById('errorContainer');
+            const aiResponse = document.getElementById('aiResponse');
+            const errorMessage = document.getElementById('errorMessage');
+            const feedbackMessage = document.getElementById('feedbackMessage');
+
+            const mood = moodInput.value.trim();
+            
+            if (!mood) {
+                showError('Please tell us how you\'re feeling!');
+                return;
+            }
+
+            // Show loading state
+            loadingContainer.style.display = 'block';
+            responseSection.style.display = 'none';
+            errorContainer.style.display = 'none';
+            feedbackMessage.style.display = 'none';
+            sparkBtn.disabled = true;
+
+            try {
+                const response = await fetch('/spark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        mood: mood,
+                        type: currentResponseType,
+                        user_id: currentUserId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentResponse = data.response;
+                    currentResponseId = data.response_id;
+                    
+                    aiResponse.textContent = data.response;
+                    responseSection.style.display = 'block';
+                    
+                    // Update the headline with the new slogan
+                    if (data.slogan) {
+                        updateHeadline(data.slogan);
+                    }
+                    
+                    // Reset feedback buttons
+                    const likeBtn = document.getElementById('likeBtn');
+                    const dislikeBtn = document.getElementById('dislikeBtn');
+                    likeBtn.classList.remove('active');
+                    dislikeBtn.classList.remove('active');
+                    likeBtn.disabled = false;
+                    dislikeBtn.disabled = false;
+                    
+                    // Smooth scroll to response
+                    responseSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Show confetti
+                    showConfetti();
+
+                    // Show share section after response
+                    showShareSection(data.response);
+                } else {
+                    showError(data.error || 'Something went wrong. Please try again!');
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                loadingContainer.style.display = 'none';
+                sparkBtn.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorContainer.style.display = 'block';
+            errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('moodInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sparkMe();
+            }
+        });
+
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatHistory = document.getElementById('chat-history');
+
+        function addMessage(text, sender) {
+            const msg = document.createElement('div');
+            msg.className = 'chat-bubble ' + sender;
+            msg.textContent = text;
+            chatHistory.appendChild(msg);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userMsg = chatInput.value.trim();
+            if (!userMsg) return;
+            addMessage(userMsg, 'user');
+            chatInput.value = '';
+            addMessage('...', 'ai');
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: userMsg })
+                });
+                const data = await res.json();
+                chatHistory.lastChild.remove(); // remove '...'
+                addMessage(data.reply, 'ai');
+            } catch (err) {
+                chatHistory.lastChild.remove();
+                addMessage('Sorry, something went wrong.', 'ai');
+            }
+        });
+
+        async function motivateMe() {
+            const moodInput = document.getElementById('moodInput');
+            const sparkBtn = document.getElementById('sparkBtn');
+            const loadingContainer = document.getElementById('loadingContainer');
+            const responseSection = document.getElementById('responseSection');
+            const errorContainer = document.getElementById('errorContainer');
+            const aiResponse = document.getElementById('aiResponse');
+            const errorMessage = document.getElementById('errorMessage');
+            const feedbackMessage = document.getElementById('feedbackMessage');
+
+            const mood = moodInput.value.trim() || 'I need motivation!';
+
+            // Show loading state
+            loadingContainer.style.display = 'block';
+            responseSection.style.display = 'none';
+            errorContainer.style.display = 'none';
+            feedbackMessage.style.display = 'none';
+            sparkBtn.disabled = true;
+
+            try {
+                const response = await fetch('/spark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        mood: mood,
+                        type: 'motivational',
+                        user_id: currentUserId
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    currentResponse = data.response;
+                    currentResponseId = data.response_id;
+                    aiResponse.textContent = data.response;
+                    responseSection.style.display = 'block';
+                    if (data.slogan) {
+                        updateHeadline(data.slogan);
+                    }
+                    const likeBtn = document.getElementById('likeBtn');
+                    const dislikeBtn = document.getElementById('dislikeBtn');
+                    likeBtn.classList.remove('active');
+                    dislikeBtn.classList.remove('active');
+                    likeBtn.disabled = false;
+                    dislikeBtn.disabled = false;
+                    responseSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Show confetti
+                    showConfetti();
+
+                    // Show share section after response
+                    showShareSection(data.response);
+                } else {
+                    showError(data.error || 'Something went wrong. Please try again!');
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                loadingContainer.style.display = 'none';
+                sparkBtn.disabled = false;
+            }
+        }
+
+        async function searchFriends() {
+            const moodInput = document.getElementById('moodInput');
+            const sparkBtn = document.getElementById('sparkBtn');
+            const loadingContainer = document.getElementById('loadingContainer');
+            const responseSection = document.getElementById('responseSection');
+            const errorContainer = document.getElementById('errorContainer');
+            const aiResponse = document.getElementById('aiResponse');
+            const errorMessage = document.getElementById('errorMessage');
+            const feedbackMessage = document.getElementById('feedbackMessage');
+
+            const mood = moodInput.value.trim() || 'I wish I had a supportive friend.';
+
+            // Show loading state
+            loadingContainer.style.display = 'block';
+            responseSection.style.display = 'none';
+            errorContainer.style.display = 'none';
+            feedbackMessage.style.display = 'none';
+            sparkBtn.disabled = true;
+
+            try {
+                const response = await fetch('/spark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        mood: mood,
+                        type: 'friend',
+                        user_id: currentUserId
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    currentResponse = data.response;
+                    currentResponseId = data.response_id;
+                    aiResponse.textContent = data.response;
+                    responseSection.style.display = 'block';
+                    if (data.slogan) {
+                        updateHeadline(data.slogan);
+                    }
+                    const likeBtn = document.getElementById('likeBtn');
+                    const dislikeBtn = document.getElementById('dislikeBtn');
+                    likeBtn.classList.remove('active');
+                    dislikeBtn.classList.remove('active');
+                    likeBtn.disabled = false;
+                    dislikeBtn.disabled = false;
+                    responseSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Show confetti
+                    showConfetti();
+
+                    // Show share section after response
+                    showShareSection(data.response);
+                } else {
+                    showError(data.error || 'Something went wrong. Please try again!');
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                loadingContainer.style.display = 'none';
+                sparkBtn.disabled = false;
+            }
+        }
+
+        // Dynamic Greeting
+        function getGreeting() {
+            const hour = new Date().getHours();
+            let greet = '';
+            if (hour < 12) greet = 'Good morning';
+            else if (hour < 18) greet = 'Good afternoon';
+            else greet = 'Good evening';
+            if (userName) greet += ', ' + userName + '!';
+            else greet += '!';
+            return greet + ' Ready to brighten your day?';
+        }
+        document.getElementById('dynamicGreeting').textContent = getGreeting();
+
+        // Confetti Animation (simple SVG confetti)
+        function showConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            canvas.width = window.innerWidth;
+            canvas.height = 300;
+            canvas.style.display = 'block';
+            const ctx = canvas.getContext('2d');
+            const colors = ['#68d391','#9f7aea','#f6ad55','#e0f4fd','#f7fbff'];
+            let confetti = [];
+            for (let i=0; i<60; i++) {
+                confetti.push({
+                    x: Math.random()*canvas.width,
+                    y: Math.random()*-canvas.height/2,
+                    r: 6+Math.random()*8,
+                    c: colors[Math.floor(Math.random()*colors.length)],
+                    s: 2+Math.random()*3
+                });
+            }
+            let frame = 0;
+            function draw() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                confetti.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
+                    ctx.fillStyle = p.c;
+                    ctx.globalAlpha = 0.8;
+                    ctx.fill();
+                    p.y += p.s;
+                    p.x += Math.sin(frame/10+p.y/30)*2;
+                });
+                frame++;
+                if (frame < 60) requestAnimationFrame(draw);
+                else canvas.style.display = 'none';
+            }
+            draw();
+        }
+
+        // Show share section after response
+        function showShareSection(response) {
+            document.getElementById('shareSection').style.display = 'flex';
+            document.getElementById('twitterShare').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(response)}`;
+            document.getElementById('whatsappShare').href = `https://wa.me/?text=${encodeURIComponent(response)}`;
+        }
+    </script>
+</body>
+</html> 
